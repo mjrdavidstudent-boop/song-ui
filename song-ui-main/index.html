@@ -1,0 +1,525 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Song UI</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=Syne:wght@700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #fcf6ec;
+            --panel: #fffaf1;
+            --ink: #172221;
+            --muted: #64706e;
+            --line: #e4d7c6;
+            --accent: #ef6c34;
+            --accent-soft: #ffe2d5;
+            --active: #f6efe2;
+            --shadow: 0 18px 40px rgba(96, 66, 30, 0.14);
+            --radius-lg: 22px;
+            --radius-md: 16px;
+            --radius-sm: 12px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            min-height: 100vh;
+            color: var(--ink);
+            font-family: 'Space Grotesk', sans-serif;
+            background:
+                radial-gradient(circle at 8% 20%, #ffd8bf 0, rgba(255, 216, 191, 0) 34%),
+                radial-gradient(circle at 85% 10%, #ffedd2 0, rgba(255, 237, 210, 0) 38%),
+                linear-gradient(140deg, #fef7ee 0%, #f8efe4 50%, #f6e8d9 100%);
+            overflow: hidden;
+            animation: fadeIn 0.55s ease;
+        }
+
+        body::before,
+        body::after {
+            content: "";
+            position: fixed;
+            pointer-events: none;
+            z-index: 0;
+            border-radius: 999px;
+            filter: blur(2px);
+        }
+
+        body::before {
+            width: 230px;
+            height: 230px;
+            right: 8%;
+            bottom: 5%;
+            background: rgba(239, 108, 52, 0.12);
+        }
+
+        body::after {
+            width: 180px;
+            height: 180px;
+            left: 24%;
+            top: 16%;
+            background: rgba(104, 138, 104, 0.1);
+        }
+
+        .layout {
+            position: relative;
+            z-index: 1;
+            display: grid;
+            grid-template-columns: 260px 1fr;
+            height: 100vh;
+            gap: 24px;
+            padding: 24px;
+        }
+
+        .sidebar {
+            background: var(--panel);
+            border: 1px solid var(--line);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow);
+            padding: 28px 20px;
+            display: flex;
+            flex-direction: column;
+            animation: slideInLeft 0.45s ease;
+        }
+
+        .brand {
+            margin-bottom: 34px;
+        }
+
+        .brand span {
+            font-family: 'Syne', sans-serif;
+            letter-spacing: 0.08em;
+            font-size: 1.15rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            color: var(--ink);
+        }
+
+        .brand small {
+            display: block;
+            margin-top: 6px;
+            color: var(--muted);
+            font-size: 0.78rem;
+            letter-spacing: 0.02em;
+        }
+
+        .nav-items {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .nav-item {
+            border-radius: 12px;
+            padding: 12px 14px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            color: #3c4a49;
+            font-size: 0.98rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: transform 0.18s ease, background-color 0.18s ease, color 0.18s ease;
+        }
+
+        .nav-item i {
+            color: var(--accent);
+            width: 16px;
+        }
+
+        .nav-item:hover {
+            background: #fef2e8;
+            transform: translateX(4px);
+        }
+
+        .nav-item.active {
+            background: var(--active);
+            color: #101918;
+            border: 1px solid #edd8bf;
+        }
+
+        .main {
+            background: rgba(255, 250, 240, 0.72);
+            border: 1px solid var(--line);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow);
+            padding: 30px;
+            overflow-y: auto;
+            animation: slideInRight 0.45s ease;
+        }
+
+        .header {
+            margin-bottom: 26px;
+        }
+
+        .search-bar {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            width: min(620px, 100%);
+            background: #fffbf4;
+            border: 1px solid #ead9c4;
+            border-radius: 999px;
+            padding: 14px 20px;
+            box-shadow: 0 12px 24px rgba(128, 87, 39, 0.08);
+        }
+
+        .search-bar i {
+            color: var(--accent);
+            font-size: 0.95rem;
+        }
+
+        .search-bar input {
+            width: 100%;
+            border: none;
+            background: transparent;
+            color: var(--ink);
+            font-size: 1rem;
+            outline: none;
+            font-family: 'Space Grotesk', sans-serif;
+        }
+
+        .search-bar input::placeholder {
+            color: #8c9085;
+        }
+
+        .content-grid {
+            display: grid;
+            grid-template-columns: 1.7fr 1fr;
+            gap: 24px;
+            align-items: start;
+        }
+
+        .featured {
+            background: #fff9ee;
+            border: 1px solid #ecd9c4;
+            border-radius: var(--radius-md);
+            padding: 22px;
+        }
+
+        .featured-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        .featured-title {
+            font-family: 'Syne', sans-serif;
+            font-size: clamp(1.5rem, 3.2vw, 2.15rem);
+            line-height: 1.1;
+            letter-spacing: 0.01em;
+        }
+
+        .featured-artist {
+            margin-top: 7px;
+            color: var(--muted);
+            font-size: 0.95rem;
+            letter-spacing: 0.01em;
+        }
+
+        .open-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            text-decoration: none;
+            color: var(--ink);
+            background: var(--accent-soft);
+            border: 1px solid #f4bda4;
+            padding: 9px 14px;
+            border-radius: 999px;
+            font-size: 0.78rem;
+            font-weight: 700;
+            letter-spacing: 0.05em;
+            transition: transform 0.2s ease, background-color 0.2s ease;
+        }
+
+        .open-btn:hover {
+            background: #ffd5c2;
+            transform: translateY(-1px);
+        }
+
+        .video-container {
+            width: 100%;
+            aspect-ratio: 16 / 9;
+            border-radius: 14px;
+            overflow: hidden;
+            border: 1px solid #ecd8c1;
+            box-shadow: 0 18px 32px rgba(118, 75, 24, 0.14);
+            position: relative;
+        }
+
+        .video-container::after {
+            content: "Now playing";
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            padding: 5px 9px;
+            border-radius: 999px;
+            font-size: 0.72rem;
+            font-weight: 700;
+            letter-spacing: 0.04em;
+            color: #4c2b19;
+            background: rgba(255, 232, 213, 0.94);
+            border: 1px solid #f2bea6;
+            z-index: 2;
+        }
+
+        .video-container iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+
+        .featured-details {
+            margin-top: 16px;
+            padding-top: 16px;
+            border-top: 1px dashed #e7d6c4;
+        }
+
+        .featured-details p {
+            margin-top: 10px;
+            color: #5c6966;
+            line-height: 1.5;
+            font-size: 0.92rem;
+        }
+
+        .recommended {
+            background: #fff9ef;
+            border: 1px solid #ecd9c6;
+            border-radius: var(--radius-md);
+            padding: 20px;
+            height: fit-content;
+        }
+
+        .recommended-title {
+            font-family: 'Syne', sans-serif;
+            font-size: 1.35rem;
+            margin-bottom: 16px;
+        }
+
+        .rec-grid {
+            display: grid;
+            gap: 14px;
+            max-height: calc(100vh - 250px);
+            overflow-y: auto;
+            padding-right: 4px;
+        }
+
+        .rec-grid::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .rec-grid::-webkit-scrollbar-thumb {
+            background: #e7cfb9;
+            border-radius: 6px;
+        }
+
+        .card {
+            display: grid;
+            grid-template-columns: 116px 1fr;
+            gap: 12px;
+            background: #fffdf8;
+            border: 1px solid #efdeca;
+            border-radius: var(--radius-sm);
+            overflow: hidden;
+            cursor: pointer;
+            transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+            animation: cardRise 0.35s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 14px 24px rgba(123, 84, 38, 0.13);
+            border-color: #efb899;
+        }
+
+        .card.active {
+            border-color: #ef9e71;
+            background: #fff2e8;
+            box-shadow: 0 12px 28px rgba(228, 127, 66, 0.19);
+        }
+
+        .card-img-container {
+            width: 100%;
+            height: 100%;
+            min-height: 88px;
+            background: #f2e3d2;
+        }
+
+        .card-img-container img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+
+        .card-info {
+            padding: 11px 12px 11px 0;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .card-title {
+            font-family: 'Syne', sans-serif;
+            font-size: 1rem;
+            margin-bottom: 4px;
+            color: #1e2827;
+            line-height: 1.2;
+        }
+
+        .card-desc {
+            color: #697573;
+            font-size: 0.83rem;
+            line-height: 1.35;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes slideInLeft {
+            from { opacity: 0; transform: translateX(-16px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+
+        @keyframes slideInRight {
+            from { opacity: 0; transform: translateX(16px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+
+        @keyframes cardRise {
+            from { opacity: 0; transform: translateY(8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @media (max-width: 1080px) {
+            .layout {
+                grid-template-columns: 1fr;
+                padding: 14px;
+                gap: 14px;
+                height: auto;
+                min-height: 100vh;
+            }
+
+            .sidebar {
+                padding: 14px;
+            }
+
+            .brand {
+                margin-bottom: 14px;
+            }
+
+            .nav-items {
+                flex-direction: row;
+                gap: 8px;
+                overflow-x: auto;
+            }
+
+            .nav-item {
+                flex: 0 0 auto;
+                padding: 10px 12px;
+                font-size: 0.9rem;
+            }
+
+            .main {
+                padding: 18px;
+                overflow: visible;
+            }
+
+            .content-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .rec-grid {
+                max-height: none;
+            }
+        }
+
+        @media (max-width: 620px) {
+            .card {
+                grid-template-columns: 1fr;
+            }
+
+            .card-img-container {
+                aspect-ratio: 16 / 9;
+                min-height: auto;
+            }
+
+            .card-info {
+                padding: 11px 12px;
+            }
+
+            .featured-header {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="layout">
+        <aside class="sidebar">
+            <div class="brand">
+                <span>Song UI</span>
+                <small>Curated clips and throwback finds</small>
+            </div>
+            <ul class="nav-items">
+                <li class="nav-item active"><i class="fa-solid fa-house"></i> Home</li>
+                <li class="nav-item"><i class="fa-solid fa-fire"></i> Trending</li>
+                <li class="nav-item"><i class="fa-solid fa-music"></i> Music</li>
+            </ul>
+        </aside>
+
+        <main class="main">
+            <div class="header">
+                <div class="search-bar">
+                    <i class="fa-solid fa-search"></i>
+                    <input type="text" id="search-input" placeholder="Search tracks or artists">
+                </div>
+            </div>
+
+            <section class="content-grid">
+                <div class="featured">
+                    <div class="featured-header">
+                        <div>
+                            <div class="featured-title" id="feat-title">One</div>
+                            <div class="featured-artist" id="feat-artist">U2 • Achtung Baby • Rock</div>
+                        </div>
+                        <a href="#" class="open-btn" id="feat-link" target="_blank">OPEN <i class="fa-solid fa-arrow-up-right-from-square"></i></a>
+                    </div>
+
+                    <div class="video-container">
+                        <iframe id="video-frame" src="https://www.youtube.com/embed/ftjEcrrf7r0?autoplay=0" allowfullscreen></iframe>
+                    </div>
+
+                    <div class="featured-details">
+                        <div class="featured-title" id="feat-bottom-title">One</div>
+                        <div class="featured-artist" id="feat-bottom-artist">U2 • Achtung Baby • Rock</div>
+                        <p>Search in the top bar and tap any recommendation to instantly switch the player.</p>
+                    </div>
+                </div>
+
+                <div class="recommended">
+                    <div class="recommended-title">Recommended</div>
+                    <div class="rec-grid" id="recommended-list">
+                        <!-- Cards are created by app.js -->
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
