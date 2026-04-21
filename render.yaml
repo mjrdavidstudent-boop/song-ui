@@ -1,0 +1,11 @@
+services:
+  - type: web
+    name: song-ui
+    env: static
+    rootDir: song-ui-main
+    buildCommand: ""
+    staticPublishPath: .
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html

@@ -27,9 +27,17 @@ function getYoutubeId(title) {
 // Fetch and display songs
 async function fetchSongs() {
     try {
-        const response = await fetch(`${API_BASE_URL}/songs`);
-        if (!response.ok) throw new Error('Failed to fetch songs');
-        
+        // Try common API paths so deployment works even if backend routes vary.
+        const endpoints = [`${API_BASE_URL}/songs`, `${API_BASE_URL}/api/songs`];
+        let response;
+
+        for (const url of endpoints) {
+            response = await fetch(url);
+            if (response.ok) break;
+        }
+
+        if (!response || !response.ok) throw new Error('Failed to fetch songs');
+
         allSongs = await response.json();
         
         // Add fake youtube/album data if API doesn't have it
