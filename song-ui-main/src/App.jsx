@@ -164,13 +164,25 @@ function App() {
                 
                 {/* Video Player */}
                 <div className="w-full aspect-video rounded-xl overflow-hidden bg-black mb-6">
-                   <ReactPlayer 
-                     url={getPlayableUrl(activeSong.url)} 
-                     width="100%" 
-                     height="100%" 
-                     controls={true}
-                     playing={true}
-                   />
+                   {getYoutubeVideoId(activeSong.url) ? (
+                     <iframe 
+                       width="100%" 
+                       height="100%" 
+                       src={`https://www.youtube.com/embed/${getYoutubeVideoId(activeSong.url)}?autoplay=1`} 
+                       title={activeSong.title} 
+                       frameBorder="0" 
+                       allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                       allowFullScreen>
+                     </iframe>
+                   ) : (
+                     <ReactPlayer 
+                       url={getPlayableUrl(activeSong.url)} 
+                       width="100%" 
+                       height="100%" 
+                       controls={true}
+                       playing={true}
+                     />
+                   )}
                 </div>
 
                 <div className="px-2">
