@@ -1,242 +1,232 @@
 import { useState, useEffect } from 'react'
 import {
-  Container,
-  Grid,
-  Card,
-  CardMedia,
-  CardContent,
   Typography,
   TextField,
-  AppBar,
-  Toolbar,
   Box,
   CircularProgress,
-  Button,
+  IconButton,
+  Button
 } from '@mui/material'
+import { ThemeProvider, createTheme } from '@mui/material/styles'
 import PlayArrowIcon from '@mui/icons-material/PlayArrow'
 import SearchIcon from '@mui/icons-material/Search'
-import FiberManualRecordIcon from '@mui/icons-material/FiberManualRecord'
+import OpenInNewIcon from '@mui/icons-material/OpenInNew'
+import HomeIcon from '@mui/icons-material/Home'
+import WhatshotIcon from '@mui/icons-material/Whatshot'
+import LibraryMusicIcon from '@mui/icons-material/LibraryMusic'
+import ShareIcon from '@mui/icons-material/Share'
+import AccessTimeIcon from '@mui/icons-material/AccessTime'
+import axios from 'axios'
+import ReactPlayer from 'react-player'
 
-const API_BASE_URL = 'https://song-api-g1nk.onrender.com'
+const theme = createTheme({
+  palette: {
+    mode: 'dark',
+    primary: {
+      main: '#ff0000',
+    },
+    background: {
+      default: '#0f0f0f',
+      paper: '#1a1a1a'
+    },
+  },
+  typography: {
+    fontFamily: '"Roboto", "Helvetica", "Arial", sans-serif',
+  }
+})
+
+const API_BASE_URL = 'https://song-api-33pe.onrender.com'
 
 function App() {
   const [songs, setSongs] = useState([])
-  const [filteredSongs, setFilteredSongs] = useState([])
-  const [selectedSong, setSelectedSong] = useState(null)
-  const [searchTerm, setSearchTerm] = useState('')
   const [loading, setLoading] = useState(true)
+  const [searchTerm, setSearchTerm] = useState('')
+  const [activeSong, setActiveSong] = useState(null)
 
-  // Fetch songs on mount
   useEffect(() => {
     fetchSongs()
   }, [])
 
-  // Get YouTube ID helper
-  const getYoutubeId = (title) => {
-    const knownSongs = {
-      'one': 'ftjEcrrf7r0',
-      'sometimes': 't0bPrt69rag',
-      'ligaya': 'XibB-5BPdrY'
-    }
-    const key = title ? title.toLowerCase() : ''
-    return knownSongs[key] || 'dQw4w9WgXcQ'
-  }
-
-  // Fetch songs from API
   const fetchSongs = async () => {
-    setLoading(true)
     try {
-      const endpoints = [`${API_BASE_URL}/songs`, `${API_BASE_URL}/api/songs`]
-      let response
-
-      for (const url of endpoints) {
-        response = await fetch(url)
-        if (response.ok) break
+      const response = await axios.get(`${API_BASE_URL}/david/songs`)
+      setSongs(response.data)
+      if (response.data.length > 0) {
+        setActiveSong(response.data[0])
       }
-
-      if (!response || !response.ok) throw new Error('Failed to fetch')
-
-      let data = await response.json()
-      data = data.map(song => ({
-        ...song,
-        album: song.album || 'Unknown Album',
-        genre: song.genre || 'Music',
-        youtubeId: song.youtubeId || getYoutubeId(song.title)
-      }))
-
-      setSongs(data)
-      setFilteredSongs(data)
-      if (data.length > 0) setSelectedSong(data[0])
+      setLoading(false)
     } catch (error) {
-      console.error('Error:', error)
-      // Fallback
-      const mockSongs = [
-        { id: 1, title: 'One', artist: 'U2', album: 'Achtung Baby', genre: 'Rock', youtubeId: 'ftjEcrrf7r0' },
-        { id: 2, title: 'Sometimes', artist: 'Britney Spears', album: '...Baby One More Time', genre: 'Pop', youtubeId: 't0bPrt69rag' },
-        { id: 3, title: 'Ligaya', artist: 'Eraserheads', album: 'Ultraelectromagneticpop!', genre: 'OPM', youtubeId: 'XibB-5BPdrY' }
-      ]
-      setSongs(mockSongs)
-      setFilteredSongs(mockSongs)
-      setSelectedSong(mockSongs[0])
-    } finally {
+      console.error('Error fetching songs:', error)
       setLoading(false)
     }
   }
 
-  // Handle search
-  const handleSearch = (e) => {
-    const term = e.target.value.toLowerCase()
-    setSearchTerm(term)
+  const handleSearch = async (e) => {
+    e.preventDefault()
+    if (!searchTerm.trim()) {
+      fetchSongs()
+      return
+    }
 
-    const filtered = songs.filter(song =>
-      (song.title && song.title.toLowerCase().includes(term)) ||
-      (song.artist && song.artist.toLowerCase().includes(term))
-    )
-    setFilteredSongs(filtered)
-  }
-
-  // Select song
-  const handleSelectSong = (song) => {
-    setSelectedSong(song)
+    try {
+      setLoading(true)
+      const response = await axios.get(`${API_BASE_URL}/david/songs/search/${searchTerm}`)
+      setSongs(response.data)
+      setLoading(false)
+    } catch (error) {
+      console.error('Error searching songs:', error)
+      setLoading(false)
+    }
   }
 
   return (
-    <Box className="bg-black min-h-screen text-white">
-      {/* Header */}
-      <AppBar position="static" className="!bg-black !border-b !border-gray-800">
-        <Toolbar className="flex justify-between">
-          <div className="flex items-center gap-2">
-            <PlayArrowIcon className="!text-orange-500" />
-            <Typography variant="h6" className="!font-bold !tracking-widest">
-              SONG UI
-            </Typography>
-          </div>
-          <div className="flex-1 mx-8 max-w-xl">
-            <TextField
-              fullWidth
-              size="small"
-              placeholder="Search songs or artists..."
-              value={searchTerm}
-              onChange={handleSearch}
-              className="!bg-gray-900 rounded"
-              InputProps={{
-                startAdornment: <SearchIcon className="mr-2 !text-gray-500" />,
-              }}
-              sx={{
-                '& .MuiOutlinedInput-root': {
-                  color: '#fff',
-                  '& fieldset': { borderColor: '#333' },
-                  '&:hover fieldset': { borderColor: '#555' },
-                },
-              }}
-            />
-          </div>
-        </Toolbar>
-      </AppBar>
+    <ThemeProvider theme={theme}>
+      <div className="flex h-screen bg-[#0f0f0f] text-white font-sans overflow-hidden">
+        {/* Sidebar */}
+        <aside className="w-64 flex flex-col p-6 hidden md:flex border-r border-[#222]">
+          <Typography variant="h6" className="font-bold tracking-widest mb-10 text-white">
+            SONG UI
+          </Typography>
+          
+          <nav className="flex flex-col gap-4">
+            <a href="#" className="flex items-center gap-4 text-white hover:text-gray-300 font-medium">
+              <HomeIcon /> Home
+            </a>
+            <a href="#" className="flex items-center gap-4 text-gray-400 hover:text-white font-medium">
+              <WhatshotIcon /> Trending
+            </a>
+            <a href="#" className="flex items-center gap-4 text-gray-400 hover:text-white font-medium">
+              <LibraryMusicIcon /> Music
+            </a>
+          </nav>
+        </aside>
 
-      <Container maxWidth="xl" className="py-8">
-        {loading ? (
-          <div className="flex justify-center items-center h-96">
-            <CircularProgress className="!text-orange-500" />
-          </div>
-        ) : (
-          <Grid container spacing={4}>
-            {/* Featured Player */}
-            <Grid item xs={12} md={8}>
-              <Box className="bg-gray-900 rounded-lg overflow-hidden">
-                {selectedSong && (
-                  <>
-                    {/* Video Player */}
-                    <Box className="aspect-video bg-black relative">
-                      <iframe
-                        width="100%"
-                        height="100%"
-                        src={`https://www.youtube.com/embed/${selectedSong.youtubeId}?autoplay=0`}
-                        title={selectedSong.title}
-                        frameBorder="0"
-                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                        allowFullScreen
-                      />
-                      <Box className="absolute top-3 left-3 bg-black/70 px-3 py-1 rounded-full flex items-center gap-1">
-                        <FiberManualRecordIcon className="!w-2 !h-2 !text-orange-500" />
-                        <Typography variant="caption" className="!text-white">Now playing</Typography>
-                      </Box>
-                    </Box>
+        {/* Main Content */}
+        <main className="flex-1 flex flex-col overflow-hidden relative">
+          
+          {/* Header Search */}
+          <header className="h-16 flex items-center justify-center border-b border-transparent mt-4 mb-4">
+            <form onSubmit={handleSearch} className="w-full max-w-xl mx-auto px-4">
+               <div className="relative flex items-center">
+                 <div className="absolute inset-y-0 left-4 flex items-center pointer-events-none">
+                    <SearchIcon className="text-gray-500" fontSize="small" />
+                 </div>
+                 <input 
+                   type="text"
+                   className="w-full bg-[#121212] border border-[#333] text-white rounded-full py-2 pl-12 pr-4 focus:outline-none focus:border-gray-500 transition-colors"
+                   placeholder="Search"
+                   value={searchTerm}
+                   onChange={(e) => setSearchTerm(e.target.value)}
+                 />
+               </div>
+            </form>
+          </header>
 
-                    {/* Song Info */}
-                    <Box className="p-6">
-                      <Box className="flex justify-between items-start mb-4">
-                        <div>
-                          <Typography variant="h4" className="!font-bold !mb-2">
-                            {selectedSong.title}
-                          </Typography>
-                          <Typography className="!text-gray-400">
-                            {selectedSong.artist} â€¢ {selectedSong.album} â€¢ {selectedSong.genre}
-                          </Typography>
-                        </div>
-                        <Button
-                          variant="outlined"
-                          href={`https://www.youtube.com/watch?v=${selectedSong.youtubeId}`}
-                          target="_blank"
-                          className="!border-orange-500 !text-orange-500 !hover:bg-orange-500/10"
-                        >
-                          Open on YouTube
-                        </Button>
-                      </Box>
-                      <Typography className="!text-gray-300">
-                        Click any card below to play a different video.
-                      </Typography>
-                    </Box>
-                  </>
-                )}
-              </Box>
-            </Grid>
+          {/* Content Area */}
+          <div className="flex-1 overflow-y-auto px-4 md:px-8 pb-10 flex flex-col lg:flex-row gap-8">
+            
+            {/* Left: Active Player */}
+            {activeSong && (
+              <div className="flex-1 lg:max-w-4xl flex flex-col">
+                <div className="flex justify-between items-start mb-4">
+                  <div>
+                    <Typography variant="h5" className="font-extrabold text-white">
+                      {activeSong.title}
+                    </Typography>
+                    <Typography variant="body2" className="text-gray-400 mt-1">
+                      {activeSong.artist} • {activeSong.album} • {activeSong.genre}
+                    </Typography>
+                  </div>
+                  <Button 
+                    variant="outlined" 
+                    endIcon={<OpenInNewIcon fontSize="small" />} 
+                    size="small"
+                    component="a"
+                    href={activeSong.url}
+                    target="_blank"
+                    sx={{ color: '#ff4444', borderColor: '#333', '&:hover': { borderColor: '#ff4444' } }}
+                  >
+                    OPEN
+                  </Button>
+                </div>
+                
+                {/* Video Player */}
+                <div className="w-full aspect-video rounded-xl overflow-hidden bg-black mb-6 relative">
+                   <ReactPlayer 
+                     url={activeSong.url} 
+                     width="100%" 
+                     height="100%" 
+                     controls={true}
+                     playing={true}
+                   />
+                </div>
 
-            {/* Sidebar - Recommended Songs */}
-            <Grid item xs={12} md={4}>
-              <Box className="bg-gray-900 rounded-lg p-4">
-                <Typography variant="h6" className="!font-bold !mb-4">
-                  Recommended
-                </Typography>
-                <Box className="space-y-3 max-h-96 overflow-y-auto">
-                  {filteredSongs.map((song) => (
-                    <Card
-                      key={song.id}
-                      onClick={() => handleSelectSong(song)}
-                      className={`!cursor-pointer !transition-all !transform !hover:-translate-y-0.5 ${
-                        selectedSong?.id === song.id
-                          ? '!border-2 !border-orange-500 !bg-gray-800'
-                          : '!bg-gray-800 !border !border-gray-700 !hover:border-orange-500'
-                      }`}
+                <div className="border-t border-[#333] pt-6 mb-4">
+                  <Typography variant="h6" className="font-bold text-white mb-2">
+                    {activeSong.title}
+                  </Typography>
+                  <Typography variant="body2" className="text-gray-400 mb-6">
+                    {activeSong.artist} • {activeSong.album} • {activeSong.genre}
+                  </Typography>
+                  <Typography variant="body2" className="text-gray-300">
+                    Search like YouTube, then click a card in "Recommended" to play.
+                  </Typography>
+                </div>
+              </div>
+            )}
+
+            {/* Right: Recommended List */}
+            <div className="w-full lg:w-80 flex flex-col">
+              <Typography variant="h6" className="font-bold text-white mb-4">
+                Recommended
+              </Typography>
+              
+              <div className="flex flex-col gap-4">
+                {loading ? (
+                    <div className="flex justify-center p-10"><CircularProgress color="primary" /></div>
+                ) : songs.length > 0 ? (
+                  songs.map((song) => (
+                    <div 
+                      key={song.id} 
+                      onClick={() => setActiveSong(song)}
+                      className={`cursor-pointer group flex flex-col bg-[#1a1a1a] rounded-2xl overflow-hidden transition-all duration-300 hover:bg-[#252525] ${activeSong?.id === song.id ? "ring-1 ring-red-500" : ""}`}
                     >
-                      <Box className="flex gap-3">
-                        <CardMedia
-                          component="img"
-                          image={`https://i.ytimg.com/vi/${song.youtubeId}/hqdefault.jpg`}
-                          alt={song.title}
-                          className="!w-24 !h-16 !object-cover"
-                        />
-                        <CardContent className="!flex-1 !p-2">
-                          <Typography className="!font-semibold !line-clamp-1">
-                            {song.title}
-                          </Typography>
-                          <Typography className="!text-xs !text-gray-400 !line-clamp-2">
-                            {song.artist}
-                            <br />
-                            {song.album}
-                          </Typography>
-                        </CardContent>
-                      </Box>
-                    </Card>
-                  ))}
-                </Box>
-              </Box>
-            </Grid>
-          </Grid>
-        )}
-      </Container>
-    </Box>
+                      <div className="w-full aspect-video bg-black relative">
+                         {/* Thumbnail placeholder or miniature player for visual */}
+                         <div className="absolute inset-0 opacity-80 group-hover:opacity-100 transition-opacity">
+                           <ReactPlayer url={song.url} width="100%" height="100%" light={true} playIcon={<PlayArrowIcon fontSize="large" color="error"/>} />
+                         </div>
+                      </div>
+                      <div className="p-4">
+                        <Typography className="font-bold text-white line-clamp-1 text-sm">
+                          {song.title}
+                        </Typography>
+                        <Typography className="text-gray-400 text-xs mt-1">
+                          {song.artist}
+                        </Typography>
+                        <Typography className="text-gray-500 text-xs mt-1 line-clamp-1">
+                          {song.album} • {song.genre}
+                        </Typography>
+                      </div>
+                    </div>
+                  ))
+                ) : (
+                  <Typography className="text-gray-500 text-center py-8">
+                    No songs found.
+                  </Typography>
+                )}
+              </div>
+            </div>
+
+          </div>
+        </main>
+      </div>
+    </ThemeProvider>
   )
 }
 
 export default App
+
+
+
+
