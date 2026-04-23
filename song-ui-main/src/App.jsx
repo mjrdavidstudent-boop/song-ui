@@ -32,6 +32,17 @@ const theme = createTheme({
 
 const API_BASE_URL = 'https://song-api-33pe.onrender.com'
 
+const getYoutubeVideoId = (url) => {
+  if (!url) return null;
+  const match = url.match(/(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([\w-]{11})/i);
+  return match ? match[1] : null;
+};
+
+const getPlayableUrl = (url) => {
+  const vid = getYoutubeVideoId(url);
+  return vid ? `https://www.youtube.com/watch?v=${vid}` : url;
+};
+
 function App() {
   const [songs, setSongs] = useState([])
   const [loading, setLoading] = useState(true)
@@ -137,7 +148,7 @@ function App() {
                     endIcon={<OpenInNewIcon fontSize="small" />} 
                     size="small"
                     component="a"
-                    href={activeSong.url}
+                    href={getPlayableUrl(activeSong.url)}
                     target="_blank"
                     sx={{ 
                       color: '#ff4444', 
@@ -154,7 +165,7 @@ function App() {
                 {/* Video Player */}
                 <div className="w-full aspect-video rounded-xl overflow-hidden bg-black mb-6">
                    <ReactPlayer 
-                     url={activeSong.url} 
+                     url={getPlayableUrl(activeSong.url)} 
                      width="100%" 
                      height="100%" 
                      controls={true}
@@ -197,7 +208,22 @@ function App() {
                     >
                       <div className="w-full aspect-video bg-black relative">
                          <div className="absolute inset-0">
-                           <ReactPlayer url={song.url} width="100%" height="100%" light={true} playIcon={<PlayArrowIcon fontSize="large" color="error"/>} />
+                           {getYoutubeVideoId(song.url) ? (
+                             <div 
+                               className="w-full h-full relative" 
+                               style={{ 
+                                 backgroundImage: `url(https://img.youtube.com/vi/${getYoutubeVideoId(song.url)}/hqdefault.jpg)`, 
+                                 backgroundSize: 'cover', 
+                                 backgroundPosition: 'center' 
+                               }}
+                             >
+                               <div className="absolute inset-0 flex justify-center items-center bg-black bg-opacity-20 group-hover:bg-opacity-40 transition-all">
+                                 <PlayArrowIcon fontSize="large" color="error"/>
+                               </div>
+                             </div>
+                           ) : (
+                             <ReactPlayer url={getPlayableUrl(song.url)} width="100%" height="100%" light={true} playIcon={<PlayArrowIcon fontSize="large" color="error"/>} />
+                           )}
                          </div>
                       </div>
                       <div className="p-4">
