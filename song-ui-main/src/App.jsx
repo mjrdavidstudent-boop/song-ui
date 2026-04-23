@@ -1,10 +1,7 @@
 import { useState, useEffect } from 'react'
 import {
   Typography,
-  TextField,
-  Box,
   CircularProgress,
-  IconButton,
   Button
 } from '@mui/material'
 import { ThemeProvider, createTheme } from '@mui/material/styles'
@@ -14,8 +11,6 @@ import OpenInNewIcon from '@mui/icons-material/OpenInNew'
 import HomeIcon from '@mui/icons-material/Home'
 import WhatshotIcon from '@mui/icons-material/Whatshot'
 import LibraryMusicIcon from '@mui/icons-material/LibraryMusic'
-import ShareIcon from '@mui/icons-material/Share'
-import AccessTimeIcon from '@mui/icons-material/AccessTime'
 import axios from 'axios'
 import ReactPlayer from 'react-player'
 
@@ -27,7 +22,7 @@ const theme = createTheme({
     },
     background: {
       default: '#0f0f0f',
-      paper: '#1a1a1a'
+      paper: '#111111'
     },
   },
   typography: {
@@ -81,22 +76,22 @@ function App() {
 
   return (
     <ThemeProvider theme={theme}>
-      <div className="flex h-screen bg-[#0f0f0f] text-white font-sans overflow-hidden">
+      <div className="flex h-screen bg-[#0a0a0a] text-white font-sans overflow-hidden">
         {/* Sidebar */}
-        <aside className="w-64 flex flex-col p-6 hidden md:flex border-r border-[#222]">
-          <Typography variant="h6" className="font-bold tracking-widest mb-10 text-white">
+        <aside className="w-64 flex flex-col p-6 hidden md:flex border-r border-[#1a1a1a]">
+          <Typography variant="h6" className="font-extrabold tracking-widest mb-10 text-white">
             SONG UI
           </Typography>
           
           <nav className="flex flex-col gap-4">
             <a href="#" className="flex items-center gap-4 text-white hover:text-gray-300 font-medium">
-              <HomeIcon /> Home
+              <HomeIcon fontSize="small" /> Home
             </a>
             <a href="#" className="flex items-center gap-4 text-gray-400 hover:text-white font-medium">
-              <WhatshotIcon /> Trending
+              <WhatshotIcon fontSize="small" /> Trending
             </a>
             <a href="#" className="flex items-center gap-4 text-gray-400 hover:text-white font-medium">
-              <LibraryMusicIcon /> Music
+              <LibraryMusicIcon fontSize="small" /> Music
             </a>
           </nav>
         </aside>
@@ -105,15 +100,15 @@ function App() {
         <main className="flex-1 flex flex-col overflow-hidden relative">
           
           {/* Header Search */}
-          <header className="h-16 flex items-center justify-center border-b border-transparent mt-4 mb-4">
-            <form onSubmit={handleSearch} className="w-full max-w-xl mx-auto px-4">
+          <header className="h-20 flex items-center justify-center pt-8 mb-6">
+            <form onSubmit={handleSearch} className="w-full max-w-2xl mx-auto px-8">
                <div className="relative flex items-center">
                  <div className="absolute inset-y-0 left-4 flex items-center pointer-events-none">
-                    <SearchIcon className="text-gray-500" fontSize="small" />
+                    <SearchIcon className="text-gray-400" fontSize="small" />
                  </div>
                  <input 
                    type="text"
-                   className="w-full bg-[#121212] border border-[#333] text-white rounded-full py-2 pl-12 pr-4 focus:outline-none focus:border-gray-500 transition-colors"
+                   className="w-full bg-[#151515] border border-[#222] text-white rounded-full py-2.5 pl-12 pr-4 focus:outline-none focus:border-red-600 transition-colors"
                    placeholder="Search"
                    value={searchTerm}
                    onChange={(e) => setSearchTerm(e.target.value)}
@@ -127,14 +122,14 @@ function App() {
             
             {/* Left: Active Player */}
             {activeSong && (
-              <div className="flex-1 lg:max-w-4xl flex flex-col">
+              <div className="flex-1 lg:max-w-4xl flex flex-col bg-[#111] p-5 rounded-2xl border border-[#1a1a1a]">
                 <div className="flex justify-between items-start mb-4">
                   <div>
-                    <Typography variant="h5" className="font-extrabold text-white">
+                    <Typography variant="h6" className="font-extrabold text-white leading-tight">
                       {activeSong.title}
                     </Typography>
-                    <Typography variant="body2" className="text-gray-400 mt-1">
-                      {activeSong.artist} • {activeSong.album} • {activeSong.genre}
+                    <Typography variant="body2" className="text-gray-400 mt-1 text-sm">
+                      {activeSong.artist} â€¢ {activeSong.album} â€¢ {activeSong.genre}
                     </Typography>
                   </div>
                   <Button 
@@ -144,14 +139,20 @@ function App() {
                     component="a"
                     href={activeSong.url}
                     target="_blank"
-                    sx={{ color: '#ff4444', borderColor: '#333', '&:hover': { borderColor: '#ff4444' } }}
+                    sx={{ 
+                      color: '#ff4444', 
+                      borderColor: '#333', 
+                      borderRadius: '20px',
+                      textTransform: 'none',
+                      '&:hover': { borderColor: '#ff4444', backgroundColor: 'rgba(255,68,68,0.1)' } 
+                    }}
                   >
                     OPEN
                   </Button>
                 </div>
                 
                 {/* Video Player */}
-                <div className="w-full aspect-video rounded-xl overflow-hidden bg-black mb-6 relative">
+                <div className="w-full aspect-video rounded-xl overflow-hidden bg-black mb-6">
                    <ReactPlayer 
                      url={activeSong.url} 
                      width="100%" 
@@ -161,14 +162,17 @@ function App() {
                    />
                 </div>
 
-                <div className="border-t border-[#333] pt-6 mb-4">
-                  <Typography variant="h6" className="font-bold text-white mb-2">
+                <div className="px-2">
+                  <Typography variant="h6" className="font-extrabold text-white mb-1">
                     {activeSong.title}
                   </Typography>
-                  <Typography variant="body2" className="text-gray-400 mb-6">
-                    {activeSong.artist} • {activeSong.album} • {activeSong.genre}
+                  <Typography variant="body2" className="text-gray-200 text-sm">
+                    {activeSong.artist}
                   </Typography>
-                  <Typography variant="body2" className="text-gray-300">
+                <Typography variant="body2" className="text-gray-400 text-sm mb-6">
+                    {activeSong.album} â€¢ {activeSong.genre}
+                  </Typography>
+                  <Typography variant="body2" className="text-gray-300 text-sm">
                     Search like YouTube, then click a card in "Recommended" to play.
                   </Typography>
                 </div>
@@ -177,23 +181,22 @@ function App() {
 
             {/* Right: Recommended List */}
             <div className="w-full lg:w-80 flex flex-col">
-              <Typography variant="h6" className="font-bold text-white mb-4">
+              <Typography variant="h6" className="font-bold text-white mb-4 pl-2">
                 Recommended
               </Typography>
               
               <div className="flex flex-col gap-4">
                 {loading ? (
-                    <div className="flex justify-center p-10"><CircularProgress color="primary" /></div>
+                    <div className="flex justify-center p-10"><CircularProgress color="error" /></div>
                 ) : songs.length > 0 ? (
                   songs.map((song) => (
                     <div 
                       key={song.id} 
                       onClick={() => setActiveSong(song)}
-                      className={`cursor-pointer group flex flex-col bg-[#1a1a1a] rounded-2xl overflow-hidden transition-all duration-300 hover:bg-[#252525] ${activeSong?.id === song.id ? "ring-1 ring-red-500" : ""}`}
+                      className={`cursor-pointer group flex flex-col bg-[#111111] rounded-[24px] overflow-hidden transition-all duration-300 hover:bg-[#181818] ${activeSong?.id === song.id ? 'border-2 border-[red] border-s-transparent  border-t-transparent  rounded-br-[40px] rounded-tl-[40px] ' : 'border-2 border-[#1a1a1a]'}`}
                     >
                       <div className="w-full aspect-video bg-black relative">
-                         {/* Thumbnail placeholder or miniature player for visual */}
-                         <div className="absolute inset-0 opacity-80 group-hover:opacity-100 transition-opacity">
+                         <div className="absolute inset-0">
                            <ReactPlayer url={song.url} width="100%" height="100%" light={true} playIcon={<PlayArrowIcon fontSize="large" color="error"/>} />
                          </div>
                       </div>
@@ -201,11 +204,11 @@ function App() {
                         <Typography className="font-bold text-white line-clamp-1 text-sm">
                           {song.title}
                         </Typography>
-                        <Typography className="text-gray-400 text-xs mt-1">
+                        <Typography className="text-gray-300 text-xs mt-1">
                           {song.artist}
                         </Typography>
                         <Typography className="text-gray-500 text-xs mt-1 line-clamp-1">
-                          {song.album} • {song.genre}
+                          {song.album} â€¢ {song.genre}
                         </Typography>
                       </div>
                     </div>
@@ -226,7 +229,3 @@ function App() {
 }
 
 export default App
-
-
-
-
